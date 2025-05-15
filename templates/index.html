@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Salvar Mensagem</title>
+    <style>
+        html, body {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #000712; /* fundo cinza bem escuro */
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    background: #f2f2f2; /* cinza bem claro */
+    padding: 30px;
+    max-width: 700px;
+    width: 90%;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    border-radius: 12px;
+}
+
+textarea {
+    width: 100%;
+    height: 200px;
+    resize: none;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+}
+
+button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    background-color: #188f00;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #137908;
+}
+
+a {
+    display: inline-block;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    margin-top: 15px;
+}
+
+a:hover {
+    background-color: #5a6268;
+}
+
+.status {
+    margin-top: 10px;
+    font-size: 14px;
+}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Enviar Mensagem</h1>
+    <textarea id="mensagem" placeholder="Digite sua mensagem aqui..."></textarea><br>
+    <button type="button" onclick="enviarMensagem()" aria-label="Enviar mensagem">Enviar</button>
+    <p class="status" id="status"></p>
+    <p><a href="/mensagens">Ver mensagens salvas</a></p>
+</div>
+
+<script>
+    function enviarMensagem() {
+        const msg = document.getElementById("mensagem").value;
+        const status = document.getElementById("status");
+        const botao = document.querySelector("button");
+
+        if (!msg.trim()) {
+            status.innerText = "Por favor, digite uma mensagem.";
+            status.style.color = "red";
+            return;
+        }
+
+        status.innerText = "Enviando...";
+        status.style.color = "#555";
+        botao.disabled = true;
+
+        fetch("/salvar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ mensagem: msg })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "ok") {
+                status.innerText = "Mensagem enviada com sucesso!";
+                status.style.color = "green";
+                document.getElementById("mensagem").value = "";
+            } else {
+                status.innerText = data.mensagem;
+                status.style.color = "red";
+            }
+        })
+        .catch(error => {
+            status.innerText = "Erro ao enviar a mensagem.";
+            status.style.color = "red";
+            console.error(error);
+        })
+        .finally(() => {
+            botao.disabled = false;
+        });
+    }
+</script>
+</body>
+</html>
